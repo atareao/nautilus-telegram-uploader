@@ -1,3 +1,2 @@
-src/nautilus-twitter-uploader.py /usr/share/nautilus-python/extensions
-data/nautilus-twitter-uploader.svg /usr/share/icons/gnome/scalable/apps
-src/TwitterAPI/*.py /usr/share/nautilus-python/extensions/TwitterAPI
+src/nautilus-500px-uploader.py /usr/share/nautilus-python/extensions
+data/nautilus-500px-uploader.svg /usr/share/icons/gnome/scalable/apps

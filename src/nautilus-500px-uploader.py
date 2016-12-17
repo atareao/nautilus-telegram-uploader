@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# This file is part of nautilus-twitter-uploader
+# This file is part of nautilus-500px-uploader
 #
 # Copyright (C) 2016 Lorenzo Carbonell
 # lorenzo.carbonell.cerezo@gmail.com
@@ -43,33 +43,59 @@ from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 from gi.repository import GLib
 from gi.repository import Nautilus as FileManager
-from TwitterAPI import TwitterAPI
+
 from requests_oauthlib import OAuth1Session
+from requests_oauthlib import OAuth1
 import json
 import codecs
 import requests
 
-APP = 'nautilus-twitter-uploader'
-APPNAME = 'nautilus-twitter-uploader'
-ICON = 'nautilus-twitter-uploader'
+APP = 'nautilus-500px-uploader'
+APPNAME = 'nautilus-500px-uploader'
+ICON = 'nautilus-500px-uploader'
 VERSION = '0.1.0'
 
 CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.config')
 CONFIG_APP_DIR = os.path.join(CONFIG_DIR, APP)
 TOKEN_FILE = os.path.join(CONFIG_APP_DIR, 'token')
 
-CLIENT_ID = '9yTpnri9pnnDgrcjv56TyQADD'
-CLIENT_SECTRET = 'S44foTOdsO5kY0sPYl0xTImbpoBW4F05He5uPR6O0cFku1CxhX'
-REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
-ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
-AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
-SIGNIN_URL = 'https://api.twitter.com/oauth/authenticate'
-EXTENSIONS_FROM = ['.bmp', '.eps', '.gif', '.jpg', '.pcx', '.png', '.ppm',
-                   '.tif', '.tiff', '.webp']
+CLIENT_ID = 'zmxFadkozE65DVCjVbcWjYh7VY8JKxNGmGPjfYG0'
+CLIENT_SECTRET = 'vuKcLYBqWVRUIKnpnIBttD8H5SEZTEs4VQgN9HvM'
+EXTENSIONS_FROM = ['.jpg']
 PARAMS = {
         'access_token_key': '',
         'access_token_secret': ''}
+
 _ = str
+
+CATEGORIES = [[_('Uncategorized'), 0],
+              [_('Abstract'), 10],
+              [_('Animals'), 11],
+              [_('Black and White'), 5],
+              [_('Celebrities'), 1],
+              [_('City and Architecture'), 9],
+              [_('Commercial'), 15],
+              [_('Concert'), 16],
+              [_('Family'), 20],
+              [_('Fashion'), 14],
+              [_('Film'), 2],
+              [_('Fine Art'), 24],
+              [_('Food'), 23],
+              [_('Journalism'), 3],
+              [_('Landscapes'), 8],
+              [_('Macro'), 12],
+              [_('Nature'), 18],
+              [_('Nude'), 4],
+              [_('People'), 7],
+              [_('Performing Arts'), 19],
+              [_('Sport'), 17],
+              [_('Still Life'), 6],
+              [_('Street'), 21],
+              [_('Transportation'), 26],
+              [_('Travel'), 13],
+              [_('Underwater'), 22],
+              [_('Urban Exploration'), 27],
+              [_('Wedding'), 25]]
 
 
 class Token(object):
@@ -159,10 +185,12 @@ class LoginDialog(Gtk.Dialog):
         try:
             uri = req.get_uri()
             print('---', uri, '---')
-            pos = uri.find('https://api.twitter.com/oauth/authorize')
+            pos = uri.find('https://localhost/?oauth_token=')
             if pos > -1:
-                self.code = uri[24:]
-                # self.hide()
+                ans = uri.split('?')[1]
+                self.oauth_token = ans.split('&')[0].split('=')[1]
+                self.oauth_verifier = ans.split('&')[1].split('=')[1]
+                self.response(Gtk.ResponseType.ACCEPT)
         except Exception as e:
             print(e)
             print('Error')
@@ -190,12 +218,14 @@ class DoItInBackground(IdleObject, Thread):
         'end_one': (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (float,)),
     }
 
-    def __init__(self, elements, twitterAPI, tweet_text):
+    def __init__(self, s00, files, name, description, category):
         IdleObject.__init__(self)
         Thread.__init__(self)
-        self.elements = elements
-        self.twitterAPI = twitterAPI
-        self.tweet_text = tweet_text
+        self.elements = files
+        self.s00 = s00
+        self.name = name
+        self.description = description
+        self.category = category
         self.stopit = False
         self.ok = False
         self.daemon = True
@@ -204,6 +234,13 @@ class DoItInBackground(IdleObject, Thread):
         self.stopit = True
 
     def send_file(self, file_in):
+        ans = self.s00.upload_image(self.name,
+                                    self.description,
+                                    self.category,
+                                    0,
+                                    file_in)
+        print(ans)
+
         tweet(self.twitterAPI, self.tweet_text, file_in)
 
     def run(self):
@@ -301,11 +338,11 @@ class Progreso(Gtk.Dialog, IdleObject):
         self.label.set_text(_('Sending: %s') % element)
 
 
-class twitterDialog(Gtk.Dialog):
+class S00pxDialog(Gtk.Dialog):
 
-    def __init__(self, parent, fileimage):
+    def __init__(self, parent=None, fileimage=None):
         Gtk.Dialog.__init__(self,
-                            _('Send images to twitter'),
+                            _('Send images to 500px'),
                             parent,
                             Gtk.DialogFlags.MODAL |
                             Gtk.DialogFlags.DESTROY_WITH_PARENT,
@@ -321,21 +358,32 @@ class twitterDialog(Gtk.Dialog):
         grid.set_row_spacing(5)
         frame.add(grid)
         self.get_content_area().add(frame)
-        label = Gtk.Label(_('Tweet')+' :')
+
+        label = Gtk.Label(_('Name')+' :')
         label.set_xalign(0)
         grid.attach(label, 0, 0, 1, 1)
-        self.tweet_length = Gtk.Label()
-        grid.attach(self.tweet_length, 1, 0, 1, 1)
-        scrolledwindow = Gtk.ScrolledWindow()
-        scrolledwindow.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
-        scrolledwindow.set_hexpand(True)
-        scrolledwindow.set_vexpand(True)
-        grid.attach(scrolledwindow, 0, 1, 2, 2)
-        self.tweet_text = Gtk.TextView()
-        self.tweet_text.set_wrap_mode(Gtk.WrapMode.WORD)
-        self.tweet_text.connect('key-release-event', self.on_insert_at_cursor)
-        scrolledwindow.add(self.tweet_text)
-        scrolledwindow.set_size_request(600, 60)
+        self.entry_name = Gtk.Entry()
+        grid.attach(self.entry_name, 1, 0, 1, 1)
+
+        label = Gtk.Label(_('Description')+' :')
+        label.set_xalign(0)
+        grid.attach(label, 0, 1, 1, 1)
+        self.entry_description = Gtk.Entry()
+        grid.attach(self.entry_description, 1, 1, 1, 1)
+
+        label = Gtk.Label(_('Category')+' :')
+        label.set_xalign(0)
+        grid.attach(label, 0, 2, 1, 1)
+        listmodel = Gtk.ListStore(str, int)
+        for i in range(len(CATEGORIES)):
+            listmodel.append(CATEGORIES[i])
+        self.combobox = Gtk.ComboBox(model=listmodel)
+        cell = Gtk.CellRendererText()
+        self.combobox.pack_start(cell, True)
+        self.combobox.add_attribute(cell, 'text', 0)
+        self.combobox.set_active(0)
+        grid.attach(self.combobox, 1, 2, 1, 1)
+
         label = Gtk.Label(_('Image')+' :')
         label.set_xalign(0)
         grid.attach(label, 0, 3, 1, 1)
@@ -351,9 +399,24 @@ class twitterDialog(Gtk.Dialog):
         self.scrolledwindow1.add(self.tweet_image)
         self.scrolledwindow1.set_size_request(600, 400)
 
-        self.load_image(fileimage)
+        if fileimage is not None:
+            self.load_image(fileimage)
 
         self.show_all()
+
+    def get_name(self):
+        return self.entry_name.get_text()
+
+    def get_description(self):
+        return self.entry_description.get_text()
+
+    def get_filename(self):
+        return self.fileimage
+
+    def get_category(self):
+        index = self.combobox.get_active()
+        model = self.combobox.get_model()
+        return model[index][1]
 
     def update_preview_cb(self, file_chooser, preview):
         filename = file_chooser.get_preview_filename()
@@ -368,7 +431,7 @@ class twitterDialog(Gtk.Dialog):
 
     def on_button_clicked(self, widget):
         dialog = Gtk.FileChooserDialog(_(
-            'Select one or more images to upload to Picasa Web'),
+            'Select one or more images to upload to 500px'),
             self,
             Gtk.FileChooserAction.OPEN,
             (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -377,23 +440,9 @@ class twitterDialog(Gtk.Dialog):
         dialog.set_select_multiple(True)
         dialog.set_current_folder(os.getenv('HOME'))
         filter = Gtk.FileFilter()
-        filter.set_name(_('Imagenes'))
-        filter.add_mime_type('image/png')
+        filter.set_name(_('Images'))
         filter.add_mime_type('image/jpeg')
-        filter.add_mime_type('image/gif')
-        filter.add_mime_type('image/x-ms-bmp')
-        filter.add_mime_type('image/x-icon')
-        filter.add_mime_type('image/tiff')
-        filter.add_mime_type('image/x-photoshop')
-        filter.add_mime_type('x-portable-pixmap')
-        filter.add_pattern('*.png')
         filter.add_pattern('*.jpg')
-        filter.add_pattern('*.gif')
-        filter.add_pattern('*.bmp')
-        filter.add_pattern('*.ico')
-        filter.add_pattern('*.tiff')
-        filter.add_pattern('*.psd')
-        filter.add_pattern('*.ppm')
         dialog.add_filter(filter)
         preview = Gtk.Image()
         dialog.set_preview_widget(preview)
@@ -423,22 +472,6 @@ class twitterDialog(Gtk.Dialog):
         print(zw, zh)
         self.tweet_image.set_from_pixbuf(pixbuf)
 
-    def on_insert_at_cursor(self, widget, event):
-        tweet_length = 140 - len(self.get_tweet_text())
-        if tweet_length < 0:
-            color = 'red'
-        else:
-            color = 'black'
-        tweet_length = _('Chars left') + ': ' + str(tweet_length)
-        tl = '<span foreground="%s">%s</span>' % (color, tweet_length)
-        self.tweet_length.set_markup(tl)
-
-    def get_tweet_text(self):
-        textbuffer = self.tweet_text.get_buffer()
-        return textbuffer.get_text(textbuffer.get_start_iter(),
-                                   textbuffer.get_end_iter(),
-                                   True)
-
 
 def get_duration(file_in):
     return os.path.getsize(file_in)
@@ -453,7 +486,7 @@ def get_files(files_in):
     return files
 
 
-class twitterUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
+class S00pxUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
 
     def __init__(self):
         token = Token()
@@ -476,49 +509,62 @@ class twitterUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
         files = get_files(selected)
         if len(files) > 0:
             if len(files) == 1:
-                td = twitterDialog(window)
-                if td.run() == Gtk.ResponseType.ACCEPT:
-                    tweet_text = td.get_tweet_text()
-                    td.destroy()
+                s00pxd = S00pxDialog(window)
+                if s00pxd.run() == Gtk.ResponseType.ACCEPT:
+                    name = s00pxd.get_name()
+                    description = s00pxd.get_description()
+                    category = s00pxd.get_category()
+                    filename = s00pxd.get_filename()
+                    files = [filename]
+                    s00pxd.destroy()
                 else:
-                    td.destroy()
+                    s00pxd.destroy()
                     return
             else:
-                tweet_text = ''
-            twitterAPI = oauth()
-            diib = DoItInBackground(files, twitterAPI, tweet_text)
-            progreso = Progreso(_('Send files to twitter'), window, len(files))
-            diib.connect('started', progreso.set_max_value)
-            diib.connect('start_one', progreso.set_element)
-            diib.connect('end_one', progreso.increase)
-            diib.connect('ended', progreso.close)
-            progreso.connect('i-want-stop', diib.stop)
-            diib.start()
-            progreso.run()
+                name = ''
+                description = ''
+                category = 0
+            s00px = oauth()
+            if s00px is not None:
+                diib = DoItInBackground(s00px,
+                                        files,
+                                        name,
+                                        description,
+                                        category)
+                progreso = Progreso(_('Send files to 500px'),
+                                    window,
+                                    len(files))
+                diib.connect('started', progreso.set_max_value)
+                diib.connect('start_one', progreso.set_element)
+                diib.connect('end_one', progreso.increase)
+                diib.connect('ended', progreso.close)
+                progreso.connect('i-want-stop', diib.stop)
+                diib.start()
+                progreso.run()
 
-    def login_to_twitter(self, menu, window):
-        twitterAPI = oauth(window)
-        if twitterAPI is not None:
+    def login_to_500px(self, menu, window):
+        s00px = oauth(window)
+        if s00px is not None:
             self.is_login = True
         else:
             self.is_login = False
 
-    def unlogin_from_twitter(self, menu):
+    def unlogin_from_500px(self, menu):
         self.token.clear()
         self.is_login = False
 
     def get_file_items(self, window, sel_items):
         top_menuitem = FileManager.MenuItem(
-            name='twitterUploaderMenuProvider::Gtk-twitter-top',
-            label=_('Send to twitter...'),
-            tip=_('Send images to twitter'))
+            name='S00pxUploaderMenuProvider::Gtk-500px-top',
+            label=_('500px...'),
+            tip=_('Send images to 500px'))
         submenu = FileManager.Menu()
         top_menuitem.set_submenu(submenu)
 
         sub_menuitem_00 = FileManager.MenuItem(
-            name='twitterUploaderMenuProvider::Gtk-twitter-sub-00',
+            name='S00pxUploaderMenuProvider::Gtk-500px-sub-00',
             label=_('Send...'),
-            tip='Send images to twitter')
+            tip='Send images to 500px')
         sub_menuitem_00.connect('activate', self.send_images, sel_items,
                                 window)
         submenu.append_item(sub_menuitem_00)
@@ -528,20 +574,20 @@ class twitterUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
             sub_menuitem_00.set_property('sensitive', False)
         if self.is_login:
             sub_menuitem_01 = FileManager.MenuItem(
-                name='twitterUploaderMenuProvider::Gtk-twitter-sub-01',
-                label=_('Unlogin from twitter'),
-                tip='Unlogin from twitter')
-            sub_menuitem_01.connect('activate', self.unlogin_from_twitter)
+                name='S00pxUploaderMenuProvider::Gtk-500px-sub-01',
+                label=_('Unlogin'),
+                tip='Unlogin from 500px')
+            sub_menuitem_01.connect('activate', self.unlogin_from_500px)
         else:
             sub_menuitem_01 = FileManager.MenuItem(
-                name='twitterUploaderMenuProvider::Gtk-twitter-sub-01',
-                label=_('Login to twitter'),
-                tip='Login to twitter to send images')
-            sub_menuitem_01.connect('activate', self.login_to_twitter, window)
+                name='S00pxUploaderMenuProvider::Gtk-500px-sub-01',
+                label=_('Login'),
+                tip='Login to 500px to send images')
+            sub_menuitem_01.connect('activate', self.login_to_500px, window)
         submenu.append_item(sub_menuitem_01)
 
         sub_menuitem_02 = FileManager.MenuItem(
-            name='twitterUploaderMenuProvider::Gtk-twitter-sub-02',
+            name='S00pxUploaderMenuProvider::Gtk-500px-sub-02',
             label=_('About'),
             tip=_('About'))
         sub_menuitem_02.connect('activate', self.about, window)
@@ -554,7 +600,7 @@ class twitterUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
         ad.set_name(APPNAME)
         ad.set_version(VERSION)
         ad.set_copyright('Copyrignt (c) 2016\nLorenzo Carbonell')
-        ad.set_comments(_('nautilus-twitter-uploader'))
+        ad.set_comments(_('nautilus-500px-uploader'))
         ad.set_license('''
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -580,30 +626,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
         ad.destroy()
 
 
-def tweet(twitterAPI, text, image=None):
-    if image is None:
-        if text is None or len(text) == 0:
-            return False
-        try:
-            r = api.request('statuses/update', {'status': text})
-            if r.status_code == 200:
-                return True
-        except Exception as e:
-            print(e)
-    else:
-        file = open(image, 'rb')
-        data = file.read()
-        try:
-            r = twitterAPI.request('statuses/update_with_media',
-                                   {'status': text},
-                                   {'media[]': data})
-            if r.status_code == 200:
-                return True
-        except Exception as e:
-            print(e)
-    return False
-
-
 def oauth(window=None):
     token = Token()
     access_token_key = token.get('access_token_key')
@@ -611,26 +633,30 @@ def oauth(window=None):
     if len(access_token_key) == 0 or len(access_token_secret) == 0:
         try:
             oauth_client = OAuth1Session(CLIENT_ID,
-                                         client_secret=CLIENT_SECTRET,
-                                         callback_uri='oob')
+                                         client_secret=CLIENT_SECTRET)
             resp = oauth_client.fetch_request_token(REQUEST_TOKEN_URL)
+            print(resp)
         except ValueError as e:
             print(e)
             return None
         url = oauth_client.authorization_url(AUTHORIZATION_URL)
+        print(url)
         ld = LoginDialog(url, window)
         if ld.run() == Gtk.ResponseType.ACCEPT:
-            pincode = ld.pincode.get_text()
+            oauth_token = ld.oauth_token
+            oauth_verifier = ld.oauth_verifier
             ld.destroy()
-            if len(pincode) > 0:
-                oauth_client = OAuth1Session(
-                    CLIENT_ID,
-                    client_secret=CLIENT_SECTRET,
-                    resource_owner_key=resp.get('oauth_token'),
-                    resource_owner_secret=resp.get('oauth_token_secret'),
-                    verifier=pincode)
+            print('***', oauth_token, oauth_verifier, '***')
+            if len(oauth_token) > 0 and len(oauth_verifier) > 0:
                 try:
+                    oauth_client = OAuth1Session(
+                        CLIENT_ID,
+                        client_secret=CLIENT_SECTRET,
+                        resource_owner_key=resp.get('oauth_token'),
+                        resource_owner_secret=resp.get('oauth_token_secret'),
+                        verifier=oauth_verifier)
                     resp = oauth_client.fetch_access_token(ACCESS_TOKEN_URL)
+                    print('****', resp, '****')
                 except ValueError as e:
                     print(e)
                     ld.destroy()
@@ -640,33 +666,48 @@ def oauth(window=None):
                 token.set('access_token_secret',
                           resp.get('oauth_token_secret'))
                 token.save()
-                twitterAPI = TwitterAPI(CLIENT_ID,
-                                        CLIENT_SECTRET,
-                                        resp.get('oauth_token'),
-                                        resp.get('oauth_token_secret'))
-                return twitterAPI
+                return S00px()
         ld.destroy()
-    else:
-        twitterAPI = TwitterAPI(CLIENT_ID,
-                                CLIENT_SECTRET,
-                                access_token_key,
-                                access_token_secret)
-        return twitterAPI
     return None
 
 
+class S00px():
+    def __init__(self):
+        token = Token()
+        access_token_key = token.get('access_token_key')
+        access_token_secret = token.get('access_token_secret')
+        if len(access_token_key) > 0 and len(access_token_secret) > 0:
+            auth = OAuth1(
+                CLIENT_ID,
+                CLIENT_SECTRET,
+                token.get('access_token_key'),
+                token.get('access_token_secret'))
+        self.session = requests.Session()
+        self.session.auth = auth
+
+    def upload_image(self, name, description, category, privacy, filename):
+        params = {'name': name,
+                  'description': description,
+                  'category': category,
+                  'privacy': privacy}
+        try:
+            files = {'file': open(filename, 'rb')}
+            r = self.session.request('POST',
+                                     'https://api.500px.com/v1/photos/upload',
+                                     params=params,
+                                     files=files)
+            return r.text
+        except Exception as e:
+            print(e)
+        return None
+
 if __name__ == '__main__':
     '''
-    twitterAPI = oauth()
-    print(twitterAPI)
-    if twitterAPI is not None:
-        tweet(
-            twitterAPI,
-            '/home/lorenzo/Escritorio/nautilus-twitter-uploader-reduced.png',
-            'Test from nautilus-twitter-uploader')
-    exit(1)
+    s00px = S00px()
+    ans = s00px.upload_image('name', 'description', 0, 0,
+                             '/home/lorenzo/Escritorio/ejemplo.jpg')
+    print(ans)
     '''
-    image = '/home/lorenzo/Escritorio/nautilus-twitter-uploader-reduced.png'
-    td = twitterDialog(None, image)
-    if td.run() == Gtk.ResponseType.ACCEPT:
-        print(td.get_tweet_text())
+    sd = S00pxDialog()
+    sd.run()
+    print(sd.get_category())
