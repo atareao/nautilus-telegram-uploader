@@ -59,6 +59,9 @@ CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.config')
 CONFIG_APP_DIR = os.path.join(CONFIG_DIR, APP)
 TOKEN_FILE = os.path.join(CONFIG_APP_DIR, 'token')
 
+REQUEST_TOKEN_URL = 'https://api.500px.com/v1/oauth/request_token'
+AUTHORIZATION_URL = 'https://api.500px.com/v1/oauth/authorize'
+ACCESS_TOKEN_URL = 'https://api.500px.com/v1/oauth/access_token'
 CLIENT_ID = 'zmxFadkozE65DVCjVbcWjYh7VY8JKxNGmGPjfYG0'
 CLIENT_SECTRET = 'vuKcLYBqWVRUIKnpnIBttD8H5SEZTEs4VQgN9HvM'
 EXTENSIONS_FROM = ['.jpg']
@@ -161,14 +164,6 @@ class LoginDialog(Gtk.Dialog):
             Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.scrolledwindow1.set_shadow_type(Gtk.ShadowType.IN)
         hbox1.pack_start(self.scrolledwindow1, True, True, 0)
-        self.hbox2 = Gtk.HBox()
-        vbox.pack_start(self.hbox2, True, True, 0)
-        self.hbox2.pack_start(Gtk.Label(_('Insert PIN')+':'),
-                              True,
-                              True,
-                              0)
-        self.pincode = Gtk.Entry()
-        self.hbox2.pack_start(self.pincode, True, True, 0)
         self.viewer = WebKit.WebView()
         self.scrolledwindow1.add(self.viewer)
         self.scrolledwindow1.set_size_request(600, 600)
