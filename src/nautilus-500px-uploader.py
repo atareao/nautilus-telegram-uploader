@@ -241,8 +241,6 @@ class DoItInBackground(IdleObject, Thread):
                                     file_in)
         print(ans)
 
-        tweet(self.twitterAPI, self.tweet_text, file_in)
-
     def run(self):
         total = 0
         for element in self.elements:
@@ -524,7 +522,7 @@ class S00pxUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
                 name = ''
                 description = ''
                 category = 0
-            s00px = oauth()
+            s00px = oauth(window)
             if s00px is not None:
                 diib = DoItInBackground(s00px,
                                         files,
@@ -600,7 +598,7 @@ class S00pxUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
         ad.set_name(APPNAME)
         ad.set_version(VERSION)
         ad.set_copyright('Copyrignt (c) 2016\nLorenzo Carbonell')
-        ad.set_comments(_('nautilus-500px-uploader'))
+        ad.set_comments(APPNAME)
         ad.set_license('''
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -668,6 +666,8 @@ def oauth(window=None):
                 token.save()
                 return S00px()
         ld.destroy()
+    else:
+        return S00px()
     return None
 
 
@@ -708,6 +708,36 @@ if __name__ == '__main__':
                              '/home/lorenzo/Escritorio/ejemplo.jpg')
     print(ans)
     '''
-    sd = S00pxDialog()
-    sd.run()
-    print(sd.get_category())
+    window = None
+    files = []
+    afile = '/home/lorenzo/Escritorio/ejemplo.jpg'
+    files.append(afile)
+    s00pxd = S00pxDialog(window, files[0])
+    if s00pxd.run() == Gtk.ResponseType.ACCEPT:
+        name = s00pxd.get_name()
+        description = s00pxd.get_description()
+        category = s00pxd.get_category()
+        filename = s00pxd.get_filename()
+        files = [filename]
+        s00pxd.destroy()
+    else:
+        s00pxd.destroy()
+        exit()
+    s00px = oauth(window)
+    print(s00px)
+    if s00px is not None:
+        diib = DoItInBackground(s00px,
+                                files,
+                                name,
+                                description,
+                                category)
+        progreso = Progreso(_('Send files to 500px'),
+                            window,
+                            len(files))
+        diib.connect('started', progreso.set_max_value)
+        diib.connect('start_one', progreso.set_element)
+        diib.connect('end_one', progreso.increase)
+        diib.connect('ended', progreso.close)
+        progreso.connect('i-want-stop', diib.stop)
+        diib.start()
+        progreso.run()
