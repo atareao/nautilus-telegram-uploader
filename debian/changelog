@@ -1,9 +1,15 @@
-nautilus-500px-uploader (0.2.0-0extras16.04.2) xenial; urgency=medium
+nautilus-500px-uploader (0.3.0-0extras16.04.0) xenial; urgency=medium
+
+  * updatade icon
+
+ -- Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>  Sun, 18 Dec 2016 09:47:02 +0100
+
+nautilus-500px-uploader (0.2.0-0extras16.04.3) xenial; urgency=medium
 
   * Changed icon
   * Fixed bug
 
- -- Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>  Sat, 17 Dec 2016 07:34:51 +0100
+ -- Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>  Sat, 17 Dec 2016 10:19:39 +0100
 
 nautilus-500px-uploader (0.1.0-0extras16.04.0) xenial; urgency=medium
 

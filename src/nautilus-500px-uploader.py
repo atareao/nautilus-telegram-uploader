@@ -509,7 +509,7 @@ class S00pxUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
         files = get_files(selected)
         if len(files) > 0:
             if len(files) == 1:
-                s00pxd = S00pxDialog(window)
+                s00pxd = S00pxDialog(window, files[0])
                 if s00pxd.run() == Gtk.ResponseType.ACCEPT:
                     name = s00pxd.get_name()
                     description = s00pxd.get_description()
