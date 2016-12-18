@@ -548,7 +548,8 @@ class S00pxUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
             self.is_login = False
 
     def unlogin_from_500px(self, menu):
-        self.token.clear()
+        token = Token()
+        token.clear()
         self.is_login = False
 
     def get_file_items(self, window, sel_items):
