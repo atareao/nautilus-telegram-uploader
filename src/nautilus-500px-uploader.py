@@ -50,10 +50,8 @@ import json
 import codecs
 import requests
 
-APP = 'nautilus-500px-uploader'
-APPNAME = 'nautilus-500px-uploader'
-ICON = 'nautilus-500px-uploader'
-VERSION = '0.1.0'
+APP = '$APP$'
+VERSION = '$VERSION$'
 
 CONFIG_DIR = os.path.join(os.path.expanduser('~'), '.config')
 CONFIG_APP_DIR = os.path.join(CONFIG_DIR, APP)
@@ -152,7 +150,6 @@ class LoginDialog(Gtk.Dialog):
                              Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
         self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         self.set_title(APP)
-        # self.set_icon_from_file(comun.ICON)
         #
         vbox = Gtk.VBox(spacing=5)
         self.get_content_area().add(vbox)
@@ -341,7 +338,7 @@ class S00pxDialog(Gtk.Dialog):
                             Gtk.DialogFlags.DESTROY_WITH_PARENT,
                             (Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT,
                              Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
-        self.set_icon_name(ICON)
+        self.set_icon_name(APP)
         self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         frame = Gtk.Frame()
         frame.set_border_width(5)
@@ -591,10 +588,10 @@ class S00pxUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
 
     def about(self, widget, window):
         ad = Gtk.AboutDialog(parent=window)
-        ad.set_name(APPNAME)
+        ad.set_name(APP)
         ad.set_version(VERSION)
         ad.set_copyright('Copyrignt (c) 2016\nLorenzo Carbonell')
-        ad.set_comments(APPNAME)
+        ad.set_comments(APP)
         ad.set_license('''
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -614,8 +611,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
             'Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>'])
         ad.set_documenters([
             'Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>'])
-        ad.set_icon_name(ICON)
-        ad.set_logo_icon_name(APPNAME)
+        ad.set_icon_name(APP)
+        ad.set_logo_icon_name(APP)
         ad.run()
         ad.destroy()
 
