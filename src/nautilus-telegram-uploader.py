@@ -128,17 +128,22 @@ class DoItInBackground(IdleObject, Thread):
             basename, old_extension = os.path.splitext(file_in)
             if old_extension.lower() != '.jpg':
                 temp_image = basename + '.jpg'
-                image_in.save(temp_image)
-                tb.send_photo(self.user_id, temp_image)
+                image_in.convert('RGB').save(temp_image)
+                afile = open(temp_image, 'rb')
+                self.tb.send_photo(self.user_id, afile)
                 os.remove(temp_image)
             else:
-                tb.send_photo(self.user_id, file_in)
+                afile = open(file_in, 'rb')
+                self.tb.send_photo(self.user_id, afile)
         elif file_extension.lower() in VIDEO_EXTENSIONS:
-            tb.send_video(self.user_id, file_in)
+            afile = open(file_in, 'rb')
+            self.tb.send_video(self.user_id, afile)
         elif file_extension.lower() in AUDIO_EXTENSIONS:
-            tb.send_audio(self.user_id, file_in)
+            afile = open(file_in, 'rb')
+            self.tb.send_audio(self.user_id, afile)
         else:
-            tb.send_data(self.user_id, file_in)
+            afile = open(file_in, 'rb')
+            self.tb.send_document(self.user_id, )
 
     def run(self):
         total = 0
@@ -319,10 +324,10 @@ class TelegramUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
                                 window)
         submenu.append_item(sub_menuitem_00)
 
-        if self.all_files_are_files(sel_items) and self.is_login:
-            sub_menuitem_00.set_property('sensitive', True)
-        else:
+        if self.all_files_are_files(sel_items) and self.user_id is None:
             sub_menuitem_00.set_property('sensitive', False)
+        else:
+            sub_menuitem_00.set_property('sensitive', True)
         if self.user_id is None:
             sub_menuitem_01 = FileManager.MenuItem(
                 name='TelegramUploaderMenuProvider::Gtk-telegram-sub-01',
