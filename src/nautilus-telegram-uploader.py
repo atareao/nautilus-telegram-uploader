@@ -31,7 +31,7 @@ except Exception as e:
     exit(-1)
 import os
 import ConfigParser
-
+from PIL import Image
 import telebot
 from telebot.apihelper import ApiException
 
@@ -54,7 +54,9 @@ CONFIG_FILE = os.path.join(CONFIG_APP_DIR, '{0}.conf'.format(APP))
 if not os.path.exists(CONFIG_APP_DIR):
     os.makedirs(CONFIG_APP_DIR)
 
-IMAGE_EXTENSIONS = ['.jpg']
+IMAGE_EXTENSIONS = ['.bmp', '.dds', '.exif', '.gif', '.jpg', '.jpeg', '.jp2',
+                    '.jpx', '.pcx', '.png', '.pnm', '.ras', '.tga', '.tif',
+                    '.tiff', '.xbm', '.xpm']
 VIDEO_EXTENSIONS = ['.mp4']
 AUDIO_EXTENSIONS = ['.mp3']
 
@@ -121,11 +123,19 @@ class DoItInBackground(IdleObject, Thread):
 
     def send_file(self, file_in):
         filename, file_extension = os.path.splitext(file_in)
-        if file_extension.lower in IMAGE_EXTENSIONS:
-            tb.send_photo(self.user_id, file_in)
-        elif file_extension.lower in VIDEO_EXTENSIONS:
+        if file_extension.lower() in IMAGE_EXTENSIONS:
+            image_in = Image.open(file_in)
+            basename, old_extension = os.path.splitext(file_in)
+            if old_extension.lower() != '.jpg':
+                temp_image = basename + '.jpg'
+                image_in.save(temp_image)
+                tb.send_photo(self.user_id, temp_image)
+                os.remove(temp_image)
+            else:
+                tb.send_photo(self.user_id, file_in)
+        elif file_extension.lower() in VIDEO_EXTENSIONS:
             tb.send_video(self.user_id, file_in)
-        elif file_extension.lower in AUDIO_EXTENSIONS:
+        elif file_extension.lower() in AUDIO_EXTENSIONS:
             tb.send_audio(self.user_id, file_in)
         else:
             tb.send_data(self.user_id, file_in)
