@@ -11,9 +11,9 @@ Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
 	python,
 	python-gi,
-	python-cairo,
+	gir1.2-gtk-3.0,
 	gir1.2-nautilus-3.0,
 	python-nautilus,
-	telegram-cli
+	python-imaging
 Description: An extension for Nautilus to upload images to telegram
  An extension for Nautilus to upload images to telegram
