@@ -1,5 +1,5 @@
 Format: http://dep.debian.net/deps/dep5
-Upstream-Name: nautilus-500px-uploader
+Upstream-Name: nautilus-telegram-uploader
 Source: http://www.atareao.es
 
 Files: *

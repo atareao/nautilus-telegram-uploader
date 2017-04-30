@@ -1,4 +1,4 @@
-Source: nautilus-500px-uploader
+Source: nautilus-telegram-uploader
 Section: utils
 Priority: extra
 Maintainer: Lorenzo Carbonell Cerezo <lorenzo.carbonell.cerezo@gmail.com>
@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.4
 Homepage: http://www.atareao.es
 
-Package: nautilus-500px-uploader
+Package: nautilus-telegram-uploader
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
 	python,
@@ -14,7 +14,6 @@ Depends: ${misc:Depends}, ${python:Depends},
 	python-cairo,
 	gir1.2-nautilus-3.0,
 	python-nautilus,
-	python-requests,
-	python-requests-oauthlib
-Description: An extension for Nautilus to upload images to 500px
- An extension for Nautilus to upload images to 500px
+	telegram-cli
+Description: An extension for Nautilus to upload images to telegram
+ An extension for Nautilus to upload images to telegram

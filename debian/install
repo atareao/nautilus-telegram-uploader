@@ -1,2 +1,3 @@
-src/nautilus-500px-uploader.py /usr/share/nautilus-python/extensions
-data/nautilus-500px-uploader.svg /usr/share/icons/gnome/scalable/apps
+src/nautilus-telegram-uploader.py /usr/share/nautilus-python/extensions
+src/telebot/* /usr/share/nautilus-python/extensions/telebot
+data/nautilus-telegram-uploader.svg /usr/share/icons/gnome/scalable/apps
