@@ -411,8 +411,7 @@ if __name__ == '__main__':
     TOKEN = '270805444:AAEwqvaJAiQ8ZFKvgSrGM2-h2lTYwiUkl8Y'
     try:
         tb = telebot.TeleBot(TOKEN) #create a new Telegram Bot object
-        tb.send_message(user_id, 'sample 2')
-        photo = open('/home/lorenzo/Escritorio/telegram-cli.jpg')
+        photo = open('/home/lorenzo/Escritorio/telegram-cli.jpg', 'rb')
         tb.send_photo(user_id, photo)
     except ApiException as e:
         print(e)
