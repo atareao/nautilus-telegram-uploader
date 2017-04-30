@@ -324,10 +324,10 @@ class TelegramUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
                                 window)
         submenu.append_item(sub_menuitem_00)
 
-        if self.all_files_are_files(sel_items) and self.user_id is None:
-            sub_menuitem_00.set_property('sensitive', False)
-        else:
+        if self.all_files_are_files(sel_items) and self.user_id is not None:
             sub_menuitem_00.set_property('sensitive', True)
+        else:
+            sub_menuitem_00.set_property('sensitive', False)
         if self.user_id is None:
             sub_menuitem_01 = FileManager.MenuItem(
                 name='TelegramUploaderMenuProvider::Gtk-telegram-sub-01',
