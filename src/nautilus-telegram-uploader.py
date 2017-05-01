@@ -143,7 +143,7 @@ class DoItInBackground(IdleObject, Thread):
             self.tb.send_audio(self.user_id, afile)
         else:
             afile = open(file_in, 'rb')
-            self.tb.send_document(self.user_id, )
+            self.tb.send_document(self.user_id, afile)
 
     def run(self):
         total = 0
