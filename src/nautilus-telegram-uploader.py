@@ -299,7 +299,7 @@ class TelegramUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
                 os.remove(CONFIG_FILE)
             config = ConfigParser.ConfigParser()
             config.add_section('User')
-            config.set('User', 'ID', user_id)
+            config.set('User', 'ID', self.user_id)
             with open(CONFIG_FILE, 'w') as configfile:
                 config.write(configfile)
 
