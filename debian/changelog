@@ -1,9 +1,9 @@
-nautilus-telegram-uploader (0.3.2-0extras16.04.2) xenial; urgency=medium
+nautilus-telegram-uploader (0.3.2-0extras16.04.3) xenial; urgency=medium
 
   * Changed icon
   * Changed login option
 
- -- Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>  Mon, 01 May 2017 12:00:52 +0200
+ -- Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>  Mon, 01 May 2017 12:15:50 +0200
 
 nautilus-telegram-uploader (0.3.1-0extras16.04.0) xenial; urgency=medium
 

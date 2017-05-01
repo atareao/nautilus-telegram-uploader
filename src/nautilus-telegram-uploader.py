@@ -270,7 +270,7 @@ class TelegramUploaderMenuProvider(GObject.GObject, FileManager.MenuProvider):
 
     def all_files_are_files(self, items):
         for item in items:
-            if os.path.isfile(unquote_plus(item.get_uri()[7:])):
+            if os.path.isfile(unquote_plus(item.get_uri()[7:])) is not True:
                 return False
         return True
 
