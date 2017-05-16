@@ -15,6 +15,6 @@ Depends: ${misc:Depends}, ${python:Depends},
 	gir1.2-nautilus-3.0,
 	python-nautilus,
 	python-imaging,
-    python-requests
+	python-requests
 Description: An extension for Nautilus to upload images to telegram
  An extension for Nautilus to upload images to telegram
