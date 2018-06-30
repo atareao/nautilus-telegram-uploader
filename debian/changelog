@@ -1,10 +1,10 @@
-nautilus-telegram-uploader (0.3.2-0extras16.04.8) xenial; urgency=medium
+nautilus-telegram-uploader (0.3.2-0extras16.04.9) xenial; urgency=medium
 
   * Changed icon
   * Changed login option
   * Fixed dependencies
 
- -- Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>  Tue, 16 May 2017 08:23:31 +0200
+ -- Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>  Sat, 30 Jun 2018 18:20:33 +0200
 
 nautilus-telegram-uploader (0.3.1-0extras16.04.0) xenial; urgency=medium
 

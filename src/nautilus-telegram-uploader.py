@@ -383,8 +383,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 if __name__ == '__main__':
-    import telebot
-    from telebot.apihelper import ApiException
     config = ConfigParser.ConfigParser()
     config.read(CONFIG_FILE)
     if len(config.sections()) == 0:
@@ -410,50 +408,8 @@ if __name__ == '__main__':
                 config.write(configfile)
     TOKEN = '270805444:AAEwqvaJAiQ8ZFKvgSrGM2-h2lTYwiUkl8Y'
     try:
-        tb = telebot.TeleBot(TOKEN) #create a new Telegram Bot object
+        tb = telebot.TeleBot(TOKEN)  # create a new Telegram Bot object
         photo = open('/home/lorenzo/Escritorio/telegram-cli.jpg', 'rb')
         tb.send_photo(user_id, photo)
     except ApiException as e:
         print(e)
-        
-    '''
-    uid = UserIDDialog(None)
-    if uid.run() == Gtk.ResponseType.ACCEPT:
-        code = int(uid.entry.get_text())
-        uid.destroy()
-        TOKEN = '270805444:AAEwqvaJAiQ8ZFKvgSrGM2-h2lTYwiUkl8Y'
-        try:
-            tb = telebot.TeleBot(TOKEN) #create a new Telegram Bot object
-            tb.send_message(code, 'sample 2')
-            photo = open('/home/lorenzo/Escritorio/telegram-cli.jpg')
-            tb.send_photo(code, photo)
-        except ApiException as e:
-            print(e)
-    '''
-    '''
-    def temporal(ipt):
-        print('aqui')
-        cd = CodeDialog(None)
-        if cd.run() == Gtk.ResponseType.ACCEPT:
-            code =cd.entry.get_text()
-            cd.destroy()
-            print(code)
-            ipt.set(code)
-    pd = PhoneDialog(None)
-    if pd.run() == Gtk.ResponseType.ACCEPT:
-        phone = pd.entry.get_text()
-        pd.destroy()
-        time.sleep(1)
-        print(phone)
-        ipt = InputPhoneThread(phone)
-        ipt.connect('code', temporal)
-        ipt.run()
-
-        cd = CodeDialog(None)
-        if cd.run() == Gtk.ResponseType.ACCEPT:
-            code =cd.entry.get_text()
-            cd.destroy()
-            print(code)
-            ipt.set(code)
-        '''
-
